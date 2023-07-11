@@ -1,0 +1,27 @@
+## Managed by Ansible
+server  {
+    {% if configure_ssl %}listen 443 ssl;
+    {% endif %}
+    
+    server_name {{ item['name'] }}.{{ local_zone }};
+
+     
+    {% if has_certificate %}
+    include {{ ssl_cert_config }};
+    {% else %}
+    include snippets/snakeoil.conf;
+    {% endif %}
+    
+
+    location  / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Scheme $scheme;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_hide_header X-Frame-Options;
+        proxy_set_header X-Frame-Options "SAMEORIGIN";
+        proxy_pass  {{ item['proto'] }}://{{ item['host'] }}:{{ item['port'] }}/{{item['path']}};
+
+    }
+}

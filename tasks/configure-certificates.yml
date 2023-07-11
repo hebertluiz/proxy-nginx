@@ -1,0 +1,60 @@
+---
+- name: Check [{{ certificate_file }}].
+  delegate_to: localhost
+  become: false
+  ansible.builtin.stat:
+    path: "files/{{ certificate_file }}"
+  register: cert_check
+
+- name: Check [{{ certificate_key }}].
+  delegate_to: localhost
+  become: false
+  ansible.builtin.stat:
+    path: "files/{{ certificate_key }}"
+  register: key_check
+
+- name: Check [{{ certificate_full }}].
+  delegate_to: localhost
+  become: false
+  ansible.builtin.stat:
+    path: "files/{{ certificate_full }}"
+  register: chain_check
+
+- name: Copy certificate for domain [{{ local_zone }}].
+  ansible.builtin.copy:
+    src: "{{ cert_check.stat.path }}"
+    mode: '0644'
+    group: 'www-data'
+    dest: "/etc/ssl/certs/{{ certificate_file }}"
+  register: cert
+  when: cert_check.stat.exists
+
+- name: Copy Chain for domain [{{ local_zone }}].
+  ansible.builtin.copy:
+    src: "{{ chain_check.stat.path }}"
+    mode: '0644'
+    group: 'www-data'
+    dest: "/etc/ssl/certs/{{ certificate_file }}"
+  register: chain
+  when: chain_check.stat.exists
+
+- name: Copy key for domain [{{ local_zone }}].
+  ansible.builtin.copy:
+    src: "{{ key_check.stat.path }}"
+    mode: '0644'
+    group: 'www-data'
+    dest: "/etc/ssl/private/{{ certificate_key }}"
+  register: certkey
+  when: key_check.stat.exists
+
+- name: Creating Nginx Config for domain [{{ local_zone }}].
+  ansible.builtin.template:
+    src: "templates/nginx-certificate.conf.j2"
+    dest: "{{ ssl_cert_config }}"
+    mode: '0644'
+  when: key_check.stat.exists
+    and (
+        cert_check.stat.exists
+        or chain_check.stat.exists
+      )
+  notify: Restart nginx

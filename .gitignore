@@ -1,0 +1,5 @@
+files/*.crt
+files/*.pem
+
+config.yml
+inventory.ini

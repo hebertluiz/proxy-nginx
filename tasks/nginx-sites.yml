@@ -1,0 +1,23 @@
+---
+- name: Create sites path.
+  ansible.builtin.file:
+    path: "{{ config_dir }}/sites-enabled"
+    state: directory
+    mode: '0755'
+  register: sites_dir
+  tags:
+    - configuration
+    - new_site
+    - update
+
+- name: Create configuration files
+  ansible.builtin.template:
+    src: "templates/nginx-site.cfg.j2"
+    dest: "{{ sites_dir.path }}/{{ item['name'] }}.conf"
+    mode: '0640'
+  with_items: '{{ sites }}'
+  tags:
+    - configuration
+    - new_site
+    - update
+  notify: Restart nginx

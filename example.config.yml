@@ -1,0 +1,41 @@
+---
+# Location for nginx configuration
+config_dir: '/etc/nginx'
+
+## Domain configurations
+# The domain name of the proxy server
+domain_name: 'proxy'
+# The DNS zone of this domain 
+local_zone: 'example.com'
+
+# Protocols
+configure_http: false   ## Not Implemented (always forward to https)
+configure_ssl: true     ## Default for proxies
+
+## SSL Please put yor certficates in files/
+# Certificate files naming must respect the reference
+# at files/README
+#
+has_certificate: true
+ssl_cert_config: "{{ config_dir }}/conf.d/{{ local_zone }}.conf"
+certificate_file: "{{ local_zone }}.crt"
+certificate_key: "{{ local_zone }}.pem"
+certificate_full: "{{ local_zone }}-fullchain.crt"
+
+## Applicattions and sites
+# Especify all apps with a valid port and protocol
+# The name will be the subdomain of the new site
+#
+sites:
+  - name: grafana
+    proto: https
+    host: 127.0.0.1
+    port: 3030
+    path: 
+
+  - name: portainer
+    proto: https
+    host: 127.0.0.1
+    port: 9443
+    path: 
+

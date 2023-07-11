@@ -1,0 +1,15 @@
+---
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: Ensure Nginx service is running
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  tags:
+    - install
+    - update

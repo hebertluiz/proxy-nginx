@@ -1,0 +1,7 @@
+{% if chain_check.stat.exists %}
+ssl_certificate {{ chain.dest }}; 
+{% else %}
+ssl_certificate {{ cert.dest }};
+{% endif%}
+ssl_certificate_key {{ certkey.dest }};
+

@@ -1,0 +1,29 @@
+---
+- name: Check if Nginx is already installed.
+  ansible.builtin.command: which Nginx
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  register: nginx_command_result
+  tags:
+    - install
+    - update
+
+- name: Install Nginx with apt.
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+  when: nginx_command_result.rc == 1
+  tags:
+    - install
+    - update
+
+- name: Configure site default
+  ansible.builtin.template:
+    src: "templates/site-default.j2"
+    dest: "{{ config_dir }}/sites-enabled/default"
+    mode: '0640'
+  tags:
+    - configuration
+    - install
+    - update
